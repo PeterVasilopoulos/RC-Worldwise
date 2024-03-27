@@ -10,6 +10,7 @@ import Login from './pages/Login'
 import CityList from './components/CityList'
 import CountryList from './components/CountryList'
 import City from './components/City'
+import Form from './components/Form'
 
 // city information url
 const BASE_URL = 'http://localhost:9000' 
@@ -63,7 +64,7 @@ function App() {
                     } />
 
                     {/* Form Route */}
-                    <Route path='form' element={<p>Form</p>} />
+                    <Route path='form' element={<Form />} />
                 </Route>
 
                 <Route path='*' element={<PageNotFound />} />
