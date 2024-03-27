@@ -9,6 +9,7 @@ import PageNotFound from './pages/PageNotFound'
 import Login from './pages/Login'
 import CityList from './components/CityList'
 import CountryList from './components/CountryList'
+import City from './components/City'
 
 // city information url
 const BASE_URL = 'http://localhost:9000' 
@@ -52,6 +53,9 @@ function App() {
                     <Route path='cities' element={
                         <CityList cities={cities} isLoading={isLoading} />
                     } />
+
+                    {/* Inidividual City Route */}
+                    <Route path='cities/:id' element={<City />} />
 
                     {/* Countries Route */}
                     <Route path='countries' element={
