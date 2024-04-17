@@ -1,4 +1,3 @@
-import {useState, useEffect} from 'react'
 import {BrowserRouter, Routes, Route, Navigate} from 'react-router-dom'
 
 import Product from './pages/Product'
@@ -11,66 +10,47 @@ import CityList from './components/CityList'
 import CountryList from './components/CountryList'
 import City from './components/City'
 import Form from './components/Form'
+import { CitiesProvider } from './context/CitiesContext'
 
-// city information url
-const BASE_URL = 'http://localhost:9000' 
 
 function App() {
-    const [cities, setCities] = useState([])
-    const [isLoading, setIsLoading] = useState(false)
-
-    useEffect(function() {
-        async function fetchCities() {
-            try {
-                setIsLoading(true)
-                const res = await fetch(`${BASE_URL}/cities`)
-                const data = await res.json()
-                setCities(data)
-            } catch {
-                alert('Error loading data...')
-            } finally {
-                setIsLoading(false)
-            }
-        }
-
-        fetchCities()
-    }, [])
-
     return (
-        <BrowserRouter>
-            <Routes>
-                <Route index element={<Homepage />} />
-                <Route path='product' element={<Product />} />
-                <Route path='pricing' element={<Pricing />} />
-                <Route path='login' element={<Login />} />
+        <CitiesProvider>
+            <BrowserRouter>
+                <Routes>
+                    <Route index element={<Homepage />} />
+                    <Route path='product' element={<Product />} />
+                    <Route path='pricing' element={<Pricing />} />
+                    <Route path='login' element={<Login />} />
 
-                {/* App Route with Subroutes */}
-                <Route path='app' element={<AppLayout />}>
-                    {/* Default Route */}
-                    <Route index element={
-                        <Navigate replace to='cities' />
-                    } />
+                    {/* App Route with Subroutes */}
+                    <Route path='app' element={<AppLayout />}>
+                        {/* Default Route */}
+                        <Route index element={
+                            <Navigate replace to='cities' />
+                        } />
 
-                    {/* Cities Route */}
-                    <Route path='cities' element={
-                        <CityList cities={cities} isLoading={isLoading} />
-                    } />
+                        {/* Cities Route */}
+                        <Route path='cities' element={
+                            <CityList />
+                        } />
 
-                    {/* Inidividual City Route */}
-                    <Route path='cities/:id' element={<City />} />
+                        {/* Inidividual City Route */}
+                        <Route path='cities/:id' element={<City />} />
 
-                    {/* Countries Route */}
-                    <Route path='countries' element={
-                        <CountryList cities={cities} isLoading={isLoading} />
-                    } />
+                        {/* Countries Route */}
+                        <Route path='countries' element={
+                            <CountryList />
+                        } />
 
-                    {/* Form Route */}
-                    <Route path='form' element={<Form />} />
-                </Route>
+                        {/* Form Route */}
+                        <Route path='form' element={<Form />} />
+                    </Route>
 
-                <Route path='*' element={<PageNotFound />} />
-            </Routes>
-        </BrowserRouter>
+                    <Route path='*' element={<PageNotFound />} />
+                </Routes>
+            </BrowserRouter>
+        </CitiesProvider>
     )
 }
 
