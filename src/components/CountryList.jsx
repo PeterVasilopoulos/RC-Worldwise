@@ -3,8 +3,12 @@ import styles from './CountryList.module.css'
 import Spinner from './Spinner'
 import Message from './Message'
 import CountryItem from './CountryItem'
+import { useCities } from '../context/CitiesContext'
 
-function CountryList({cities, isLoading}) {
+function CountryList() {
+    // retrieve values from context
+    const {cities, isLoading} = useCities()
+
     // check if the data is loading
     if(isLoading) {
         return <Spinner />
