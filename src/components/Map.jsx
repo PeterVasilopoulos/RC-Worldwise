@@ -1,28 +1,37 @@
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import {MapContainer, TileLayer, Marker, Popup} from 'react-leaflet'
+import {MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents} from 'react-leaflet'
 
 import styles from './Map.module.css'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useCities } from '../context/CitiesContext'
 
 function Map() {
-    // useNavigate hook
-    const navigate = useNavigate()
+    // get cities from context
+    const {cities} = useCities()
 
     // get starting position
     const [mapPosition, setMapPosition] = useState([40, 0])
 
     // pulling parameters from url
-    const [searchParams, setSearchParams] = useSearchParams()
+    const [searchParams] = useSearchParams()
 
     // getting lattitude and longitude parameters from searchParams
-    const lat = searchParams.get('lat')
-    const lng = searchParams.get('lng')
+    const mapLat = searchParams.get('lat')
+    const mapLng = searchParams.get('lng')
+
+    // syncrhonize map position and mapLat, mapLng
+    useEffect(function(){
+        // set new position if values exist
+        if(mapLat && mapLng) {
+            setMapPosition([mapLat, mapLng])
+        }
+    }, [mapLat, mapLng])
 
     return (
         <div className={styles.mapContainer}>
             <MapContainer 
-                center={mapPosition} 
-                zoom={13} 
+                center={mapPosition}
+                zoom={6} 
                 scrollWheelZoom={true}
                 className={styles.map}
             >
@@ -30,14 +39,44 @@ function Map() {
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                 url="https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png"
                 />
-                <Marker position={mapPosition}>
-                <Popup>
-                    A pretty CSS3 popup. <br /> Easily customizable.
-                </Popup>
-                </Marker>
+
+                {
+                    cities.map(city => 
+                        <Marker position={[city.position.lat, city.position.lng]} key={city.id}>
+                        <Popup>
+                            <span>{city.emoji}</span> <span>{city.cityName}</span>
+                        </Popup>
+                        </Marker>
+                    )
+                }
+
+                <ChangeCenter position={mapPosition} />
+                <DetectClick />
+
             </MapContainer>
         </div>
     )
+}
+
+// Change Center Component
+function ChangeCenter({position}) {
+    // get instance of map
+    const map = useMap()
+    // set map to new position
+    map.setView(position)
+
+    return null
+}
+
+// Detect Click Component
+function DetectClick() {
+    // useNavigate hook
+    const navigate = useNavigate()
+
+    // check for click event
+    useMapEvents({
+        click: e => navigate(`form?lat=${e.latlng.lat}&lng=${e.latlng.lng}`)
+    })
 }
 
 export default Map
