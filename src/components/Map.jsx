@@ -1,82 +1,121 @@
-import { useNavigate, useSearchParams } from 'react-router-dom'
-import {MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents} from 'react-leaflet'
+import { useNavigate, useSearchParams } from "react-router-dom";
+import {
+    MapContainer,
+    TileLayer,
+    Marker,
+    Popup,
+    useMap,
+    useMapEvents,
+} from "react-leaflet";
 
-import styles from './Map.module.css'
-import { useEffect, useState } from 'react'
-import { useCities } from '../context/CitiesContext'
+import styles from "./Map.module.css";
+import { useEffect, useState } from "react";
+import { useCities } from "../context/CitiesContext";
+import { useGeolocation } from "../../hooks/useGeolocation";
+import Button from "./Button";
 
 function Map() {
     // get cities from context
-    const {cities} = useCities()
+    const { cities } = useCities();
 
     // get starting position
-    const [mapPosition, setMapPosition] = useState([40, 0])
+    const [mapPosition, setMapPosition] = useState([40, 0]);
 
     // pulling parameters from url
-    const [searchParams] = useSearchParams()
+    const [searchParams] = useSearchParams();
+
+    // pull geolocation
+    const {
+        isLoading: isLoadingPosition,
+        position: geolocationPosition,
+        getPosition,
+    } = useGeolocation();
 
     // getting lattitude and longitude parameters from searchParams
-    const mapLat = searchParams.get('lat')
-    const mapLng = searchParams.get('lng')
+    const mapLat = searchParams.get("lat");
+    const mapLng = searchParams.get("lng");
 
     // syncrhonize map position and mapLat, mapLng
-    useEffect(function(){
-        // set new position if values exist
-        if(mapLat && mapLng) {
-            setMapPosition([mapLat, mapLng])
-        }
-    }, [mapLat, mapLng])
+    useEffect(
+        function () {
+            // set new position if values exist
+            if (mapLat && mapLng) {
+                setMapPosition([mapLat, mapLng]);
+            }
+        },
+        [mapLat, mapLng]
+    );
+
+    // place geolocationPosition into mapPosition
+    useEffect(
+        function () {
+            if (geolocationPosition) {
+                setMapPosition([
+                    geolocationPosition.lat,
+                    geolocationPosition.lng,
+                ]);
+            }
+        },
+        [geolocationPosition]
+    );
 
     return (
         <div className={styles.mapContainer}>
-            <MapContainer 
+            {!geolocationPosition && (
+                <Button type="position" onClick={getPosition}>
+                    {isLoadingPosition ? "Loading..." : "Use your position"}
+                </Button>
+            )}
+
+            <MapContainer
                 center={mapPosition}
-                zoom={6} 
+                zoom={6}
                 scrollWheelZoom={true}
                 className={styles.map}
             >
                 <TileLayer
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                url="https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png"
+                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                    url="https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png"
                 />
 
-                {
-                    cities.map(city => 
-                        <Marker position={[city.position.lat, city.position.lng]} key={city.id}>
+                {cities.map((city) => (
+                    <Marker
+                        position={[city.position.lat, city.position.lng]}
+                        key={city.id}
+                    >
                         <Popup>
-                            <span>{city.emoji}</span> <span>{city.cityName}</span>
+                            <span>{city.emoji}</span>{" "}
+                            <span>{city.cityName}</span>
                         </Popup>
-                        </Marker>
-                    )
-                }
+                    </Marker>
+                ))}
 
                 <ChangeCenter position={mapPosition} />
                 <DetectClick />
-
             </MapContainer>
         </div>
-    )
+    );
 }
 
 // Change Center Component
-function ChangeCenter({position}) {
+function ChangeCenter({ position }) {
     // get instance of map
-    const map = useMap()
+    const map = useMap();
     // set map to new position
-    map.setView(position)
+    map.setView(position);
 
-    return null
+    return null;
 }
 
 // Detect Click Component
 function DetectClick() {
     // useNavigate hook
-    const navigate = useNavigate()
+    const navigate = useNavigate();
 
     // check for click event
     useMapEvents({
-        click: e => navigate(`form?lat=${e.latlng.lat}&lng=${e.latlng.lng}`)
-    })
+        click: (e) => navigate(`form?lat=${e.latlng.lat}&lng=${e.latlng.lng}`),
+    });
 }
 
-export default Map
+export default Map;
