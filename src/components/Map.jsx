@@ -13,6 +13,7 @@ import { useEffect, useState } from "react";
 import { useCities } from "../context/CitiesContext";
 import { useGeolocation } from "../../hooks/useGeolocation";
 import Button from "./Button";
+import { useUrlPosition } from "../../hooks/useUrlPosition";
 
 function Map() {
     // get cities from context
@@ -21,9 +22,6 @@ function Map() {
     // get starting position
     const [mapPosition, setMapPosition] = useState([40, 0]);
 
-    // pulling parameters from url
-    const [searchParams] = useSearchParams();
-
     // pull geolocation
     const {
         isLoading: isLoadingPosition,
@@ -31,9 +29,8 @@ function Map() {
         getPosition,
     } = useGeolocation();
 
-    // getting lattitude and longitude parameters from searchParams
-    const mapLat = searchParams.get("lat");
-    const mapLng = searchParams.get("lng");
+    // import url data from custom hook
+    const [mapLat, mapLng] = useUrlPosition();
 
     // syncrhonize map position and mapLat, mapLng
     useEffect(
