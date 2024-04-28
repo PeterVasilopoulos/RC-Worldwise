@@ -68,7 +68,7 @@ function Form() {
                 }
             }
 
-            // call function
+            // call the function
             fetchCityData();
         },
         [lat, lng]
